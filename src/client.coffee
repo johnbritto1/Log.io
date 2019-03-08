@@ -18,6 +18,7 @@ else
   $ = eval "require('jquery')"
 backbone = require 'backbone'
 backbone.$ = $
+Clusterize = require 'clusterize.js'
 io = require 'socket.io-client'
 _ = require 'underscore'
 templates = require './templates'
@@ -586,6 +587,11 @@ class LogScreenView extends backbone.View
     @$el.find('.messages').scroll @_recordScroll
     @$el.find('.controls .filter input').keyup @__filter
     @msgs = @$el.find '.msg'
+    new Clusterize
+      scrollElem: @el.querySelector '.messages'
+      contentElem: @el.querySelector '.msg'
+      tag: 'p'
+      show_no_data_row: false
     @_renderMessages()
     @
 
