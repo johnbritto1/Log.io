@@ -57,8 +57,8 @@
 // Globals
 
 * {
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0;
 	font-family: 'Source Sans Pro', Verdana, Arial, sans-serif;
 }
 
@@ -85,7 +85,7 @@ body {
 		display: block;
 		float: left;
 		width: @controlWidth / 2;
-		padding: 8px 0px;
+		padding: 8px 0;
 		text-align: center;
 		background-color: #000;
 		text-decoration: none;
@@ -139,7 +139,7 @@ body {
 			.diode {
 				width: 8px;
 				height: 8px;
-				margin: 4px 8px 0px 0px;
+				margin: 4px 8px 0 0;
 				background-color: #555;
 				border-radius: 4px;
 
@@ -198,7 +198,6 @@ body {
 	}
 
 	input.filter {
-		border: none;
 		padding: 6px;
 		width: @controlWidth - 12 - 16;
 		font-size: 12px;
@@ -227,7 +226,7 @@ body {
 
 		div.controls {
 			position: absolute;
-			top: 0px;
+			top: 0;
 			right: 10px;
 			padding: 5px;
 			float: left;
@@ -272,7 +271,9 @@ body {
 
 			.msg {
 				margin: 10px;
-				color: #0c0;
+				color: #eee;
+
+				outline: none;
 
 				p, p * {
 					font-size: 12px;
@@ -280,6 +281,11 @@ body {
 					font-weight: 400;
 					font-family: 'Inconsolata', Courier, sans-serif;
 				}
+
+				.level-debug { color: @color6; }
+				.level-info { color: @color2; }
+				.level-warn, .level-warning { color: @color4; }
+				.level-error { color: @color7; }
 
 				.color1 { color: @color1; }
 				.color2 { color: @color2; }
@@ -326,7 +332,7 @@ body {
 			font-weight: 600;
 			color: #ccc;
 			padding: 5px 10px;
-			margin: 0px 10px 10px;
+			margin: 0 10px 10px;
 			display: block;
 			float: left;
 		}
@@ -335,7 +341,7 @@ body {
 			float: right;
 			.stat {
 				float: right;
-				margin: 0px 30px 0px 0px;
+				margin: 0 30px 0 0;
 				line-height: 30px;
 				.num {
 					font-size: 32px;

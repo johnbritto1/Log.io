@@ -2,17 +2,27 @@
 <html>
   <head>
     <title>log.io</title>
-    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
-    <link href="lib/log.io.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="lib/log.io.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/clusterize.js/0.18.0/clusterize.min.css"
+          integrity="sha256-kJfPtGy9bUIpQZuossvZA3rOoNdqy3HnPIQXX7K2x9A=" crossorigin="anonymous" />
   </head>
   <body>
     <div id="web_client"></div>
     <script src="lib/log.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clusterize.js/0.18.0/clusterize.min.js"
+            integrity="sha256-j2fSUXSx7aab6LM9Rhktwi08KATeQeYqfrLrUS3c56Y=" crossorigin="anonymous"></script>
     <script>
       var cli = require("/src/client.coffee");
-      var is_https = window.location.href.indexOf("https") == 0;
+      var is_https = window.location.href.indexOf("https") === 0;
       client = new cli.WebClient({secure: is_https}, localStorage);
+      new Clusterize({
+        scrollElem: document.querySelector('.messages'),
+        contentElem: document.querySelector('.msg'),
+        tag: 'p',
+        show_no_data_row: false
+      });
     </script>
   </body>
 </html>

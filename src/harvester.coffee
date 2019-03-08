@@ -107,7 +107,7 @@ class LogHarvester
 
   _sendLog: (stream, msg) ->
     @_log.debug "Sending log: (#{stream.name}) #{msg}"
-    @_send '+log', stream.name, @nodeName, 'info', msg 
+    @_send '+log', stream.name, @nodeName, 'none', msg
 
   _announce: ->
     snames = (l.name for l in @logStreams).join ","

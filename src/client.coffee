@@ -43,7 +43,7 @@ colors = new ColorManager
 ###
 Backbone models are used to represent nodes and streams.  When nodes
 go offline, their LogNode model is destroyed, along with their
-stream assocations.
+stream associations.
 
 ###
 
