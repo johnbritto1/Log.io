@@ -6,7 +6,8 @@
   "keywords": ["logs", "monitoring", "realtime", "socket.io", "node.js", "ajax"],
   "author": "Mike Smathers <msmathers@narrativescience.com>",
   "contributors": [
-    { "name": "Mike Smathers", "email": "msmathers@narrativescience.com" }
+    { "name": "Mike Smathers", "email": "msmathers@narrativescience.com" },
+    { "name": "Andrew Shulgin", "email": "andrewshulginua@gmail.com" }
   ],
   "dependencies": {
     "backbone": "~0.9.10",
@@ -33,6 +34,11 @@
     "log.io-harvester": "./bin/log.io-harvester"
   },
   "scripts": {
+    "build": "cake build",
+    "templates": "cake templates",
+    "compile": "cake compile",
+    "less": "cake less",
+    "browserify": "cake browserify",
     "prepublish": "cake build",
     "postinstall": "cake ensure:configuration"
   }
