@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-winston = require('winston');
-logging = new winston.Logger({
-  transports: [ new winston.transports.Console({
-    level: 'error'
-  })]
+const winston = require('winston');
+const logging = winston.createLogger({
+    format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+    ),
+    transports: [new winston.transports.Console({level: 'error'})]
 });
-homeDir = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-conf = require(homeDir + '/.log.io/harvester.conf').config;
+const homeDir = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+const conf = require(homeDir + '/.log.io/harvester.conf').config;
 conf.logging = logging;
-harvester = require('../index.js');
-harvester = new harvester.LogHarvester(conf);
+const index = require('../index.js');
+const harvester = new index.LogHarvester(conf);
 harvester.run();
