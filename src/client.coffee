@@ -150,7 +150,6 @@ class WebClient
   constructor: (opts = {host: '', secure: null}, localStorage = null) ->
     @host = opts.host
     @secure = if opts.secure != null then opts.secure else window.location.href.indexOf('https') is 0
-    console.log @secure
     @localStorage = if localStorage != null then localStorage else window.localStorage
     @stats =
       nodes: 0
