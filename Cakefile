@@ -32,7 +32,7 @@ task 'browserify', "Compiles client.coffee to browser-friendly JS", ->
 
 task 'less', "Compiles less templates to CSS", ->
   console.log "Compiling src/less/* to lib/log.io.css"
-  exec "#{LESS} #{__dirname}/src/less/log.io.less -compress -o #{__dirname}/lib/log.io.css", (err, stdout, stderr) ->
+  exec "#{LESS} #{__dirname}/src/less/log.io.less #{__dirname}/lib/log.io.css", (err, stdout, stderr) ->
     throw err if err
     console.log stdout + stderr if stdout + stderr
 
