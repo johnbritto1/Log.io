@@ -37,6 +37,7 @@ changes, extracts new log messages, and emits 'new_log' events.
 ###
 class LogStream extends events.EventEmitter
   constructor: (@name, @paths, @_log) ->
+    super arguments...
 
   watch: ->
     @_log.info "Starting log stream: '#{@name}'"

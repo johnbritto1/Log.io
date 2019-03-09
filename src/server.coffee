@@ -80,6 +80,7 @@ inbound TCP messages, and emits events.
 ###
 class LogServer extends events.EventEmitter
   constructor: (config={}) ->
+    super arguments...
     {@host, @port} = config
     @_log = config.logging ? winston
     @_delimiter = config.delimiter ? '\r\n'
@@ -97,7 +98,7 @@ class LogServer extends events.EventEmitter
 
   _tearDown: (socket) ->
     # Destroy a client socket
-    @_log.error 'Lost TCP connection...'
+    @_log.debug 'Client disconnected...'
     if socket.node
       @_removeNode socket.node.name
       delete socket.node

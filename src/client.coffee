@@ -12,10 +12,7 @@ screen.on 'new_log', (stream, node, level, message) ->
 
 ###
 
-if process.browser
-  $ = require 'jquery-browserify'
-else
-  $ = eval "require('jquery')"
+$ = require 'jquery'
 backbone = require 'backbone'
 backbone.$ = $
 Clusterize = require 'clusterize.js'
@@ -34,7 +31,7 @@ Every new Stream or Node is assigned a color value on instantiation.
 
 class ColorManager
   _max: 20
-  constructor: (@_index=1) ->
+  constructor: (@_index = 1) ->
   next: ->
     @_index = 1 if @_index is @_max
     @_index++;
@@ -76,8 +73,8 @@ class LogNodes extends _LogObjects
   model: LogNode
 
 class LogMessage extends backbone.Model
-  ROPEN = new RegExp '<','ig'
-  RCLOSE = new RegExp '>','ig'
+  ROPEN = new RegExp '<', 'ig'
+  RCLOSE = new RegExp '>', 'ig'
   render_message: ->
     @get('message').replace(ROPEN, '&lt;').replace(RCLOSE, '&gt;')
 
@@ -112,8 +109,8 @@ class LogScreen extends backbone.Model
     pairIds.push pid if pid not in pairIds
     stream.trigger 'lwatch', node, @
     node.trigger 'lwatch', stream, @
-    stream.screens.update @
-    node.screens.update @
+    stream.screens.reset @
+    node.screens.reset @
     @collection.trigger 'addPair'
 
   removePair: (stream, node) ->
@@ -150,7 +147,11 @@ LogStreams collections, which triggers view events.
 ###
 
 class WebClient
-  constructor: (opts={host: '', secure: false}, @localStorage={}) ->
+  constructor: (opts = {host: '', secure: null}, localStorage = null) ->
+    @host = opts.host
+    @secure = if opts.secure != null then opts.secure else window.location.href.indexOf('https') is 0
+    console.log @secure
+    @localStorage = if localStorage != null then localStorage else window.localStorage
     @stats =
       nodes: 0
       streams: 0
@@ -166,7 +167,7 @@ class WebClient
       webClient: @
     @app.render()
     @_initScreens()
-    @socket = io.connect opts.host, secure: opts.secure
+    @socket = io.connect @host, secure: @secure
     _on = (args...) => @socket.on args...
 
     # Bind to socket events from server
@@ -265,7 +266,7 @@ TODO(msmathers): Build templates, fill out render() methods
 ###
 
 class ClientApplication extends backbone.View
-  el: '#web_client'
+  el: 'body'
   template: _.template templates.clientApplication
   initialize: (opts) ->
     {@logNodes, @logStreams, @logScreens, @webClient} = opts
@@ -497,7 +498,7 @@ class LogScreensPanel extends backbone.View
   events:
     "click #new_screen_button": "_newScreen"
 
-  _newScreen: (e) ->
+  _newScreen: () ->
     @logScreens.add new @logScreens.model name: 'Screen1'
     false
 
@@ -514,7 +515,7 @@ class LogScreensPanel extends backbone.View
     if lscreens.length
       height = $(window).height() - @$el.find("div.status_bar").height() - 10
       @$el.find(".log_screen .messages").each ->
-        $(@).height (height/lscreens.length) - 12
+        $(@).height (height / lscreens.length) - 12
 
   render: ->
     @$el.html @template()
@@ -562,7 +563,7 @@ class LogScreenView extends backbone.View
     @logScreen.logMessages.add lmessage
     @_renderNewLog lmessage
 
-  _recordScroll: (e) =>
+  _recordScroll: () =>
     msgs = @$el.find '.messages'
     @forceScroll = (msgs.height() + msgs[0].scrollTop) is msgs[0].scrollHeight
 
@@ -609,4 +610,9 @@ class LogStatsView extends backbone.View
     @rendered = true
     @
 
-exports.WebClient = WebClient
+window.$ = $
+window._ = _
+window.backbone = backbone
+window.WebClient = WebClient
+
+new WebClient();

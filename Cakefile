@@ -15,7 +15,6 @@ task 'build', "Builds Log.io package", ->
   invoke 'templates'
   invoke 'compile'
   invoke 'less'
-  invoke 'browserify'
   # Ensure browserify has completed
   # setTimeout (-> invoke 'func_test'), 2000
 
@@ -24,10 +23,11 @@ task 'compile', "Compiles CoffeeScript src/*.coffee to lib/*.js", ->
   exec "#{COFFEE} --compile --output #{__dirname}/lib/ #{__dirname}/src/", (err, stdout, stderr) ->
     throw err if err
     console.log stdout + stderr if stdout + stderr
+    invoke 'browserify'
 
 task 'browserify', "Compiles client.coffee to browser-friendly JS", ->
-  console.log "Browserifying src/client.coffee to lib/log.io.js"
-  exec "#{BROWSERIFY} src/client.coffee --exports process,require -o #{ __dirname }/lib/log.io.js", (err, stdout, stderr) ->
+  console.log "Browserifying lib/client.js to lib/log.io.js"
+  exec "#{BROWSERIFY} #{ __dirname }/lib/client.js -o #{ __dirname }/lib/log.io.js", (err, stdout, stderr) ->
     console.log stdout + stderr if err
 
 task 'less', "Compiles less templates to CSS", ->

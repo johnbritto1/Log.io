@@ -10,19 +10,18 @@
     { "name": "Andrew Shulgin", "email": "andrewshulginua@gmail.com" }
   ],
   "dependencies": {
-    "backbone": "~0.9.10",
+    "backbone": "~1.4.0",
     "clusterize.js": "~0.18.1",
-    "underscore": "~1.4.3",
-    "jquery": "~1.11.0",
-    "jquery-browserify": "~1.8.1",
-    "socket.io": "~0.9.13",
-    "socket.io-client": "~0.9.11",
+    "underscore": "~1.9.1",
+    "jquery": "~3.3.1",
+    "socket.io": "~0.9.19",
+    "socket.io-client": "~0.9.17",
     "express": "~4.16.4",
-    "winston": "~0.6.2",
-    "coffee-script": "~1.4.0"
+    "winston": "~2.4.4",
+    "coffeescript": "~1.12.7"
   },
   "devDependencies": {
-    "browserify": "~1.16.6",
+    "browserify": "~16.2.3",
     "less": "~3.9.0",
     "mocha": "~1.7.4",
     "chai": "~1.4.0",
