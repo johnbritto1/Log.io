@@ -22,15 +22,14 @@ describe = mocha.describe
 {LogServer, WebServer} = require '../lib/server.js'
 WebClient = require '../lib/client.js'
 
-logging = winston.createLogger(
+logger = winston.createLogger
   format: winston.format.combine(
     winston.format.colorize(),
     winston.format.simple()
   )
   transports: [
-    new winston.transports.Console(level: 'debug')
+    new winston.transports.Console level: 'debug'
   ]
-)
 
 
 # Configuration
@@ -47,7 +46,7 @@ TEST_FILES = [
 ]
 
 HARVESTER1_CONFIG =
-  logging: logging
+  logger: logger
   nodeName: 'server01'
   logStreams:
     stream1: TEST_FILES[0..1]
@@ -57,7 +56,7 @@ HARVESTER1_CONFIG =
     port: 28771
 
 HARVESTER2_CONFIG =
-  logging: logging
+  logger: logger
   nodeName: 'server02'
   logStreams:
     stream2: TEST_FILES[4..5]
@@ -67,15 +66,15 @@ HARVESTER2_CONFIG =
     port: 28771
 
 LOG_SERVER_CONFIG =
-  logging: logging
+  logger: logger
   port: 28771
 WEB_SERVER_CONFIG =
-  logging: logging
+  logger: logger
   port: 28772
 
 # Drop empty test files
 
-fs.writeFile fpath, '' for fpath in TEST_FILES
+fs.writeFileSync fpath, '' for fpath in TEST_FILES
 
 # Initialize servers
 
@@ -101,12 +100,11 @@ describe 'LogServer', ->
 
 # Initialize client
 
-webClient = new WebClient host: 'http://0.0.0.0:28772'
-
 # Write to watched files, verify end-to-end propagation
 
 describe 'WebClient', ->
   it 'waits for server connection...', (connected) ->
+    webClient = new WebClient host: 'http://127.0.0.1:28772'
     webClient.socket.on 'initialized', ->
       describe 'WebClient state', ->
         it 'should be notified of registered nodes & streams', ->

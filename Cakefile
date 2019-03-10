@@ -183,8 +183,9 @@ lint = () ->
                 message += ": #{error.context}"
               console.error message
           if errorCount > 0
+            s = if errorCount > 1 then 's' else ''
             return Promise.reject(
-              new Error "#{errorCount} errors reported by CoffeeLint"
+              new Error "CoffeeLint reported #{errorCount} error#{s}"
             )
           else
             return Promise.resolve()
@@ -193,17 +194,22 @@ lint = () ->
 
 test = () ->
   console.log 'Running tests...'
-  return compileCoffeeFile(
-    path.join(TEST, 'functional.coffee'), TEST, TEST
-  ).then(
-    (js) ->
-      console.log js
-      mocha = new Mocha
-      mocha.addFile(js)
-      mocha.run (failures) ->
-        console.log failures
-        return Promise.resolve()
-  )
+  return new Promise (resolve, reject) ->
+    return compileCoffeeFile(
+      path.join(TEST, 'functional.coffee'), TEST, TEST
+    ).then(
+      (js) ->
+        mocha = new Mocha
+        mocha.addFile(js)
+        mocha.run (errorCount) ->
+          if errorCount > 0
+            s = if errorCount > 1 then 's' else ''
+            return reject(
+              new Error "Mocha reported #{errorCount} error#{s}"
+            )
+          else
+            return resolve()
+    )
 
 ensureConfig = () ->
   console.log 'Ensuring configuration files exist under ~/.log.io/...'
