@@ -6,7 +6,7 @@
 # TODO(msmathers): Write more complete test coverage.
 ###
 
-(require 'jsdom-global')('', {url: "http://localhost"})
+(require 'jsdom-global')('', {url: "http://127.0.0.1:28772"})
 
 fs = require 'fs'
 chai = require 'chai'
