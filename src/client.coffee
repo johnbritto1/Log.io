@@ -34,7 +34,7 @@ class ColorManager
   constructor: (@_index = 1) ->
   next: ->
     @_index = 1 if @_index is @_max
-    @_index++;
+    @_index++
 
 colors = new ColorManager
 
@@ -130,7 +130,7 @@ class LogScreen extends backbone.Model
   _pid: (stream, node) -> "#{stream.id}:#{node.id}"
 
   isActive: (object, getPair) ->
-    # Returns true if all object pairs are activated on screen
+# Returns true if all object pairs are activated on screen
     return false if not object.pairs.length
     object.pairs.every (item) =>
       [stream, node] = getPair object, item
@@ -149,8 +149,14 @@ LogStreams collections, which triggers view events.
 class WebClient
   constructor: (opts = {host: '', secure: null}, localStorage = null) ->
     @host = opts.host
-    @secure = if opts.secure != null then opts.secure else window.location.href.indexOf('https') is 0
-    @localStorage = if localStorage != null then localStorage else window.localStorage
+    @secure = (
+      if opts.secure != null
+      then opts.secure else window.location.href.indexOf('https') is 0
+    )
+    @localStorage = (
+      if localStorage != null
+      then localStorage else window.localStorage
+    )
     @stats =
       nodes: 0
       streams: 0
@@ -183,7 +189,10 @@ class WebClient
     @logScreens.on 'add remove addPair removePair', =>
       @localStorage['logScreens'] = JSON.stringify @logScreens.toJSON()
     screenCache = @localStorage['logScreens']
-    screens = if screenCache then JSON.parse(screenCache) else [{name: 'Screen1'}]
+    screens = (
+      if screenCache
+      then JSON.parse(screenCache) else [{name: 'Screen1'}]
+    )
     @logScreens.add new @logScreens.model screen for screen in screens
 
   _addNode: (node) =>
@@ -228,6 +237,8 @@ class WebClient
           message: message
 
   _ping: (msg) =>
+    if not msg
+      return
     {stream, node} = msg
     stream = @logStreams.get stream
     node = @logNodes.get node
@@ -359,7 +370,7 @@ class ObjectControls extends backbone.View
   _resize: =>
     return if not window?
     height = $(window).height()
-    @$el.find(".groups").height height - 80;
+    @$el.find(".groups").height height - 80
 
   render: ->
     @$el.html @template
@@ -570,12 +581,17 @@ class LogScreenView extends backbone.View
     _msg = lmessage.get 'message'
     msg = lmessage.render_message()
     if @filter
-      msg = if _msg.match @filter then msg.replace @filter, '<span class="highlight">$1</span>' else null
+      msg = (
+        if _msg.match @filter
+        then msg.replace @filter, '<span class="highlight">$1</span>' else null
+      )
     if msg
       @msgs.append @logTemplate
         lmessage: lmessage
         msg: msg
-      @$el.find('.messages')[0].scrollTop = @$el.find('.messages')[0].scrollHeight if @forceScroll
+      @$el.find('.messages')[0].scrollTop = (
+        @$el.find('.messages')[0].scrollHeight if @forceScroll
+      )
 
   _renderMessages: =>
     @msgs.html ''
@@ -609,9 +625,9 @@ class LogStatsView extends backbone.View
     @rendered = true
     @
 
+module.exports = WebClient
+
 window.$ = $
 window._ = _
 window.backbone = backbone
 window.WebClient = WebClient
-
-new WebClient();

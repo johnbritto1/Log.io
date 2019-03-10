@@ -1,18 +1,32 @@
 #!/usr/bin/env node
+const os = require('os');
+const path = require('path');
 const winston = require('winston');
-const logging = winston.createLogger({
-    format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-    ),
-    transports: [new winston.transports.Console({level: 'error'})]
-});
-const homeDir = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
-const webConf = require(homeDir + '/.log.io/web_server.conf').config;
-webConf.logging = logging;
-const logConf = require(homeDir + '/.log.io/log_server.conf').config;
-logConf.logging = logging;
-const server = require('../index.js');
-const logServer = new server.LogServer(logConf);
-const webServer = new server.WebServer(logServer, webConf);
+const servers = require('../lib/server');
+
+const webConf = require(
+    path.join(os.homedir(), '.log.io', 'web_server.conf')
+).config;
+const logConf = require(
+    path.join(os.homedir(), '.log.io', 'log_server.conf')
+).config;
+
+const createLogger = (label, level = 'info') => {
+    return winston.createLogger({
+        format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.timestamp(),
+            winston.format.label({label: label}),
+            winston.format.printf((
+                {timestamp, label, level, message}
+            ) => `${timestamp} [${label}] ${level}: ${message}`)
+        ),
+        transports: [new winston.transports.Console({level: level})]
+    });
+};
+
+webConf.logger = createLogger('web', webConf.logLevel || 'info');
+logConf.logger = createLogger('log', logConf.logLevel || 'info');
+const logServer = new servers.LogServer(logConf);
+const webServer = new servers.WebServer(logServer, webConf);
 webServer.run();

@@ -5,6 +5,8 @@
   "homepage": "http://logio.org",
   "keywords": ["logs", "monitoring", "realtime", "socket.io", "node.js", "ajax"],
   "author": "Mike Smathers <msmathers@narrativescience.com>",
+  "repository": "github:NarrativeScience/Log.io",
+  "license": "Apache-2.0",
   "contributors": [
     { "name": "Mike Smathers", "email": "msmathers@narrativescience.com" },
     { "name": "Andrew Shulgin", "email": "andrewshulginua@gmail.com" }
@@ -22,7 +24,10 @@
   },
   "devDependencies": {
     "browserify": "~16.2.3",
+    "coffeelint": "~2.1.0",
     "less": "~3.9.0",
+    "jsdom": "~14.0.0",
+    "jsdom-global": "~3.0.2",
     "mocha": "~6.0.2",
     "chai": "~4.2.0",
     "sinon-chai": "~3.3.0",
@@ -34,11 +39,14 @@
   },
   "scripts": {
     "build": "cake build",
-    "templates": "cake templates",
-    "compile": "cake compile",
-    "less": "cake less",
+    "compile:templates": "cake compile:templates",
+    "compile:coffee": "cake compile:coffee",
+    "compile:less": "cake compile:less",
     "browserify": "cake browserify",
+    "ensure:config": "cake ensure:config",
+    "lint": "cake lint",
+    "test": "cake test",
     "prepublish": "cake build",
-    "postinstall": "cake ensure:configuration"
+    "postinstall": "cake ensure:config"
   }
 }

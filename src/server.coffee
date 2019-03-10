@@ -33,7 +33,6 @@ http = require 'http'
 https = require 'https'
 io = require 'socket.io'
 events = require 'events'
-winston = require 'winston'
 express = require 'express'
 
 class _LogObject
@@ -82,7 +81,7 @@ class LogServer extends events.EventEmitter
   constructor: (config={}) ->
     super arguments...
     {@host, @port} = config
-    @_log = config.logging ? winston
+    @_log = config.logger
     @_delimiter = config.delimiter ? '\r\n'
     @logNodes = {}
     @logStreams = {}
@@ -183,7 +182,7 @@ class WebServer
     {@host, @port, @auth} = config
     {@logNodes, @logStreams} = @logServer
     @restrictSocket = config.restrictSocket ? '*:*'
-    @_log = config.logging ? winston
+    @_log = config.logger
     # Create express server
     app = @_buildServer config
     @http = @_createServer config, app
@@ -194,7 +193,7 @@ class WebServer
       app.use express.basicAuth @auth.user, @auth.pass
     if config.restrictHTTP
       ips = new RegExp config.restrictHTTP.join '|'
-      app.all '/', (req, res, next) =>
+      app.all '/', (req, res, next) ->
         if not req.ip.match ips
           return res.send 403, "Your IP (#{req.ip}) is not allowed."
         next()

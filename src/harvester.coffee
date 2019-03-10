@@ -28,7 +28,6 @@ harvester.run()
 fs = require 'fs'
 net = require 'net'
 events = require 'events'
-winston = require 'winston'
 
 ###
 LogStream is a group of local files paths.  It watches each file for
@@ -45,22 +44,22 @@ class LogStream extends events.EventEmitter
     @
 
   _watchFile: (path) ->
-      if not fs.existsSync path
-        @_log.error "File doesn't exist: '#{path}'"
-        setTimeout (=> @_watchFile path), 1000
-        return
-      @_log.info "Watching file: '#{path}'"
-      currSize = fs.statSync(path).size
-      watcher = fs.watch path, (event, filename) =>
-        if event is 'rename'
-          # File has been rotated, start new watcher
-          watcher.close()
-          @_watchFile path
-        if event is 'change'
-          # Capture file offset information for change event
-          fs.stat path, (err, stat) =>
-            @_readNewLogs path, stat.size, currSize
-            currSize = stat.size
+    if not fs.existsSync path
+      @_log.error "File doesn't exist: '#{path}'"
+      setTimeout (=> @_watchFile path), 1000
+      return
+    @_log.info "Watching file: '#{path}'"
+    currSize = fs.statSync(path).size
+    watcher = fs.watch path, (event, filename) =>
+      if event is 'rename'
+        # File has been rotated, start new watcher
+        watcher.close()
+        @_watchFile path
+      if event is 'change'
+        # Capture file offset information for change event
+        fs.stat path, (err, stat) =>
+          @_readNewLogs path, stat.size, currSize
+          currSize = stat.size
 
   _readNewLogs: (path, curr, prev) ->
     # Use file offset information to stream new log lines from file
@@ -75,7 +74,8 @@ class LogStream extends events.EventEmitter
       @emit 'new_log', line for line in lines when line
 
 ###
-LogHarvester creates LogStreams and opens a persistent TCP connection to the server.
+LogHarvester creates LogStreams and opens a persistent TCP connection
+to the server.
 
 On startup it announces itself as Node with Stream associations.
 Log messages are sent to the server via string-delimited TCP messages
@@ -85,8 +85,10 @@ class LogHarvester
   constructor: (config) ->
     {@nodeName, @server} = config
     @delim = config.delimiter ? '\r\n'
-    @_log = config.logging ? winston
-    @logStreams = (new LogStream s, paths, @_log for s, paths of config.logStreams)
+    @_log = config.logger
+    @logStreams = (
+      new LogStream s, paths, @_log for s, paths of config.logStreams
+    )
 
   run: ->
     @_connect()

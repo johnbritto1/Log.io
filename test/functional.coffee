@@ -6,19 +6,32 @@
 # TODO(msmathers): Write more complete test coverage.
 ###
 
+(require 'jsdom-global')('', {url: "http://localhost"})
+
 fs = require 'fs'
 chai = require 'chai'
+mocha = require 'mocha'
 _ = require 'underscore'
 winston = require 'winston'
 sinon_chai = require 'sinon-chai'
 chai.use sinon_chai
 should = chai.should()
+describe = mocha.describe
 
-{LogHarvester} = require '../../lib/harvester.js'
-{LogServer, WebServer} = require '../../lib/server.js'
-{WebClient} = require '../../lib/client.js'
-logging = new winston.Logger
-  transports: [ new winston.transports.Console level: 'error']
+{LogHarvester} = require '../lib/harvester.js'
+{LogServer, WebServer} = require '../lib/server.js'
+WebClient = require '../lib/client.js'
+
+logging = winston.createLogger(
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.simple()
+  )
+  transports: [
+    new winston.transports.Console(level: 'debug')
+  ]
+)
+
 
 # Configuration
 
@@ -95,7 +108,6 @@ webClient = new WebClient host: 'http://0.0.0.0:28772'
 describe 'WebClient', ->
   it 'waits for server connection...', (connected) ->
     webClient.socket.on 'initialized', ->
-
       describe 'WebClient state', ->
         it 'should be notified of registered nodes & streams', ->
           webClient.logNodes.should.have.length 2
@@ -109,7 +121,7 @@ describe 'WebClient', ->
           screen1.logMessages.should.have.length 0
 
           describe 'log message propagation', ->
-            it 'should populate client backbone collection on file writes', (done) ->
+            it 'should populate backbone collection on file writes', (done) ->
               msg1 = "log message 1"
               msg2 = "log message 2"
               # This file is a member of the watched stream
