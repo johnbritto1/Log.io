@@ -122,13 +122,13 @@ describe 'WebClient', ->
             it 'should populate backbone collection on file writes', (done) ->
               msg1 = "log message 1"
               msg2 = "log message 2"
-              # This file is a member of the watched stream
-              fs.appendFileSync TEST_FILES[0], "#{msg1}\n"
-              # This file is not a member of the watched stream
-              fs.appendFileSync TEST_FILES[2], "#{msg2}\n"
               webClient.socket.once 'new_log', ->
                 screen1.logMessages.should.have.length 1
                 screen1.logMessages.at(0).get('message').should.equal msg1
                 done()
+              # This file is a member of the watched stream
+              fs.appendFileSync TEST_FILES[0], "#{msg1}\n"
+              # This file is not a member of the watched stream
+              fs.appendFileSync TEST_FILES[2], "#{msg2}\n"
 
       connected()

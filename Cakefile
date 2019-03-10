@@ -277,9 +277,14 @@ task(
   'test',
   'Run functional tests',
   ->
-    test().catch (err) ->
-      console.error err.message
-      process.exit(1)
+    exitCode = 0
+    test().catch(
+      (err) ->
+        console.error err.message
+        exitCode = 1
+    ).then(
+      () -> process.exit(exitCode)
+    )
 )
 
 task(
