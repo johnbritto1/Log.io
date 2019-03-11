@@ -25,9 +25,19 @@ harvester.run()
 
 ###
 
+events = require 'events'
 fs = require 'fs'
 net = require 'net'
-events = require 'events'
+os = require 'os'
+
+DEFAULT_CONFIG =
+  nodeName: 'harvester',
+  server:
+    host: '127.0.0.1',
+    port: 28777
+  logger: console,
+  delimiter: '\r\n',
+  logStreams: {}
 
 ###
 LogStream is a group of local files paths.  It watches each file for
@@ -36,7 +46,7 @@ changes, extracts new log messages, and emits 'new_log' events.
 ###
 class LogStream extends events.EventEmitter
   constructor: (@name, @paths, @_log) ->
-    super arguments...
+    super()
 
   watch: ->
     @_log.info "Starting log stream: '#{@name}'"
@@ -50,13 +60,15 @@ class LogStream extends events.EventEmitter
       return
     @_log.info "Watching file: '#{path}'"
     currSize = fs.statSync(path).size
-    watcher = fs.watch path, (event, filename) =>
+    watcher = fs.watch path, (event) =>
       if event is 'rename'
         # File has been rotated, start new watcher
+        @_log.debug "File #{path} has been rotated, starting new watcher..."
         watcher.close()
         @_watchFile path
       if event is 'change'
         # Capture file offset information for change event
+        @_log.debug "File #{path} has been changed, reading new data..."
         fs.stat path, (err, stat) =>
           @_readNewLogs path, stat.size, currSize
           currSize = stat.size
@@ -70,7 +82,7 @@ class LogStream extends events.EventEmitter
       end: curr
     # Emit 'new_log' event for every captured log line
     rstream.on 'data', (data) =>
-      lines = data.split "\n"
+      lines = data.split os.EOL
       @emit 'new_log', line for line in lines when line
 
 ###
@@ -82,9 +94,10 @@ Log messages are sent to the server via string-delimited TCP messages
 
 ###
 class LogHarvester
-  constructor: (config) ->
+  constructor: (config = DEFAULT_CONFIG) ->
+    config = Object.assign DEFAULT_CONFIG, config
     {@nodeName, @server} = config
-    @delim = config.delimiter ? '\r\n'
+    @delim = config.delimiter
     @_log = config.logger
     @logStreams = (
       new LogStream s, paths, @_log for s, paths of config.logStreams
@@ -101,9 +114,9 @@ class LogHarvester
     @socket = new net.Socket
     @socket.on 'error', (error) =>
       @_connected = false
-      @_log.error "Unable to connect server, trying again..."
+      @_log.error "Unable to connect server: #{error.message}, trying again..."
       setTimeout (=> @_connect()), 2000
-    @_log.info "Connecting to server..."
+    @_log.info "Connecting to server #{@server.host}:#{@server.port}..."
     @socket.connect @server.port, @server.host, =>
       @_connected = true
       @_announce()
@@ -113,7 +126,7 @@ class LogHarvester
     @_send '+log', stream.name, @nodeName, 'none', msg
 
   _announce: ->
-    snames = (l.name for l in @logStreams).join ","
+    snames = (l.name for l in @logStreams).join ','
     @_log.info "Announcing: #{@nodeName} (#{snames})"
     @_send '+node', @nodeName, snames
     @_send '+bind', 'node', @nodeName

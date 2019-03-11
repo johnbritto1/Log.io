@@ -27,19 +27,36 @@ webServer.run()
 
 ###
 
+events = require 'events'
 fs = require 'fs'
-net = require 'net'
 http = require 'http'
 https = require 'https'
+net = require 'net'
 io = require 'socket.io'
-events = require 'events'
+
 express = require 'express'
+
+DEFAULT_LOG_CONFIG =
+  host: '127.0.0.1',
+  port: 28777,
+  logger: console,
+  delimiter: '\r\n'
+
+DEFAULT_WEB_CONFIG =
+  host: '127.0.0.1',
+  port: 28778,
+  logger: console,
+  auth: null,
+  ssl: null,
+  restrictSocket: '*:*',
+  restrictHTTP: null,
+  staticPath: __dirname + '/../'
 
 class _LogObject
   _type: 'object'
   _pclass: ->
   _pcollection: ->
-  constructor: (@logServer, @name, _pairs=[]) ->
+  constructor: (@logServer, @name, _pairs = []) ->
     @logServer.emit "add_#{@_type}", @
     @pairs = {}
     @pclass = @_pclass()
@@ -78,11 +95,12 @@ inbound TCP messages, and emits events.
 
 ###
 class LogServer extends events.EventEmitter
-  constructor: (config={}) ->
-    super arguments...
+  constructor: (config = DEFAULT_LOG_CONFIG) ->
+    super()
+    config = Object.assign DEFAULT_LOG_CONFIG, config
     {@host, @port} = config
     @_log = config.logger
-    @_delimiter = config.delimiter ? '\r\n'
+    @_delimiter = config.delimiter
     @logNodes = {}
     @logStreams = {}
 
@@ -126,12 +144,13 @@ class LogServer extends events.EventEmitter
       when '-node' then @_removeNode args...
       when '-stream' then @_removeStream args...
       when '+bind' then @_bindNode socket, args...
-      else @_log.error "Invalid TCP message: #{msg}"
+      else
+        @_log.error "Invalid TCP message: #{msg}"
 
-  _addNode: (nname, snames='') ->
+  _addNode: (nname, snames = '') ->
     @__add nname, snames, @logNodes, LogNode, 'node'
 
-  _addStream: (sname, nnames='') ->
+  _addStream: (sname, nnames = '') ->
     @__add sname, nnames, @logStreams, LogStream, 'stream'
 
   _removeNode: (nname) ->
@@ -171,17 +190,17 @@ class LogServer extends events.EventEmitter
       setTimeout (=> @_ping socket), 2000
 
 
-
 ###
 WebServer relays LogServer events to web clients via socket.io.
 
 ###
 
 class WebServer
-  constructor: (@logServer, config) ->
+  constructor: (@logServer, config = DEFAULT_WEB_CONFIG) ->
+    config = Object.assign DEFAULT_WEB_CONFIG, config
     {@host, @port, @auth} = config
     {@logNodes, @logStreams} = @logServer
-    @restrictSocket = config.restrictSocket ? '*:*'
+    @restrictSocket = config.restrictSocket
     @_log = config.logger
     # Create express server
     app = @_buildServer config
@@ -197,7 +216,7 @@ class WebServer
         if not req.ip.match ips
           return res.send 403, "Your IP (#{req.ip}) is not allowed."
         next()
-    staticPath = config.staticPath ? __dirname + '/../'
+    staticPath = config.staticPath
     app.use express.static staticPath
 
   _createServer: (config, app) ->
@@ -212,14 +231,13 @@ class WebServer
   run: ->
     @_log.info 'Starting Log.io Web Server...'
     @logServer.run()
-    io = io.listen @http.listen @port, @host
-    io.set 'origins', @restrictSocket
-    @listener = io.sockets
+    io = io @http.listen @port, @host
+    io.origins([@restrictSocket])
 
     _on = (args...) => @logServer.on args...
     _emit = (_event, msg) =>
       @_log.debug "Relaying: #{_event}"
-      @listener.emit _event, msg
+      io.emit _event, msg
 
     # Bind events from LogServer to web client
     _on 'add_node', (node) ->
@@ -236,17 +254,17 @@ class WebServer
       _emit 'remove_stream', stream.toDict()
 
     # Bind new log event from Logserver to web client
-    _on 'new_log', (stream, node, level, message) =>
+    _on 'new_log', (stream, node, level, message) ->
       _emit 'ping', {stream: stream.name, node: node.name}
       # Only send message to web clients watching logStream
-      @listener.in("#{stream.name}:#{node.name}").emit 'new_log',
+      io.in("#{stream.name}:#{node.name}").emit 'new_log',
         stream: stream.name
         node: node.name
         level: level
         message: message
 
     # Bind web client connection, events to web server
-    @listener.on 'connection', (wclient) =>
+    io.on 'connection', (wclient) =>
       wclient.emit 'add_node', node.toDict() for n, node of @logNodes
       wclient.emit 'add_stream', stream.toDict() for s, stream of @logStreams
       for n, node of @logNodes
@@ -256,7 +274,7 @@ class WebServer
       wclient.on 'watch', (pid) ->
         wclient.join pid
       wclient.on 'unwatch', (pid) ->
-        wclient.leave pid
+        wclient.leave pid, null
     @_log.info 'Server started, listening...'
 
 exports.LogServer = LogServer
