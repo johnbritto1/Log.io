@@ -47,6 +47,6 @@
     "lint": "cake lint",
     "test": "cake test",
     "prepublish": "cake build",
-    "postinstall": "cake ensure:config"
+    "postinstall": "cake build && cake ensure:config"
   }
 }
