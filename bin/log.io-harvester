@@ -1,27 +1,41 @@
 #!/usr/bin/env node
+
 const os = require('os');
 const path = require('path');
 const winston = require('winston');
 const LogHarvester = require('../lib/harvester').LogHarvester;
-
-const conf = require(
-    path.join(os.homedir(), '.log.io', 'harvester.conf')
-).config;
-
-const createLogger = (label, level = 'info') => {
-    return winston.createLogger({
-        format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.timestamp(),
-            winston.format.label({label: label}),
-            winston.format.printf((
-                {timestamp, label, level, message}
-            ) => `${timestamp} [${label}] ${level}: ${message}`)
-        ),
-        transports: [new winston.transports.Console({level: level})]
+homeDir = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+var fs = require('fs');
+fs.readdir(homeDir + '/.log.io/', function(err, files) {
+    if (err) throw err;
+    //looking for config files starting by 'harvester'
+    files.forEach(function(file) {
+        if (/^harvester/.test(file)) {
+            const createLogger = (label, level = 'info') => {
+                return winston.createLogger({
+                    format: winston.format.combine(
+                        winston.format.colorize(),
+                        winston.format.timestamp(),
+                        winston.format.label({
+                            label: label
+                        }),
+                        winston.format.printf(({
+                            timestamp,
+                            label,
+                            level,
+                            message
+                        }) => `${timestamp} [${label}] ${level}: ${message}`)
+                    ),
+                    transports: [new winston.transports.Console({
+                        level: level
+                    })]
+                });
+            };
+            console.log('using config file ' + file);
+            const conf = require(homeDir + '/.log.io/' + file).config;
+            conf.logger = createLogger('harvester', conf.logLevel || 'info');
+            const harvester = new LogHarvester(conf);
+            harvester.run();
+        }
     });
-};
-
-conf.logger = createLogger('harvester', conf.logLevel || 'info');
-const harvester = new LogHarvester(conf);
-harvester.run();
+});
