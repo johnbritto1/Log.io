@@ -12,7 +12,16 @@
     { "name": "Andrew Shulgin", "email": "andrewshulginua@gmail.com" }
   ],
   "dependencies": {
-	"glob": "^7.1.4",
+    "glob": "^7.1.4",
+	"browserify": "~16.2.3",
+    "coffeelint": "~2.1.0",
+    "less": "~3.9.0",
+    "jsdom": "~14.0.0",
+    "jsdom-global": "~3.0.2",
+    "mocha": "~6.0.2",
+    "chai": "~4.2.0",
+    "sinon-chai": "~3.3.0",
+    "sinon": "~7.2.7",
     "backbone": "~1.4.0",
     "clusterize.js": "~0.18.1",
     "underscore": "~1.9.1",
@@ -24,22 +33,12 @@
     "coffeescript": "~1.12.7"
   },
   "devDependencies": {
-    "browserify": "~16.2.3",
-    "coffeelint": "~2.1.0",
-    "less": "~3.9.0",
-    "jsdom": "~14.0.0",
-    "jsdom-global": "~3.0.2",
-    "mocha": "~6.0.2",
-    "chai": "~4.2.0",
-    "sinon-chai": "~3.3.0",
-    "sinon": "~7.2.7"
   },
   "bin" : {
     "log.io-server": "./bin/log.io-server",
     "log.io-harvester": "./bin/log.io-harvester"
   },
   "scripts": {
-    "build": "cake build",
     "compile:templates": "cake compile:templates",
     "compile:coffee": "cake compile:coffee",
     "compile:less": "cake compile:less",
@@ -47,7 +46,6 @@
     "ensure:config": "cake ensure:config",
     "lint": "cake lint",
     "test": "cake test",
-    "prepublish": "cake build",
     "postinstall": "cake build && cake ensure:config"
   }
 }
