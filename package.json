@@ -12,6 +12,7 @@
     { "name": "Andrew Shulgin", "email": "andrewshulginua@gmail.com" }
   ],
   "dependencies": {
+	"glob": "^7.1.4",
     "backbone": "~1.4.0",
     "clusterize.js": "~0.18.1",
     "underscore": "~1.9.1",
